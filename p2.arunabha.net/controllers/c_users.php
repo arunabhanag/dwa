@@ -57,7 +57,7 @@ class users_controller extends base_controller {
 		
 		# Insert this user into the database
 		$user_id = DB::instance(DB_NAME)->insert("users", $_POST);
-	
+		
 		#$users = DB::instance(DB_NAME)->select_rows("SELECT * FROM users");
 
 	}
@@ -101,11 +101,20 @@ class users_controller extends base_controller {
 	}
 	public function logout() 
 	{
-		if($this->userObj)
-		{
-			$this->userObj->logout();
-		}
-		Router::redirect("/users/login/");
+		# Generate and save a new token for next login
+		$new_token = sha1(TOKEN_SALT.$this->user->email.Utils::generate_random_string());
+		
+		# Create the data array we'll use with the update method
+		# In this case, we're only updating one field, so our array only has one entry
+		$data = Array("token" => $new_token);
+		
+		# Do the update
+		DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$this->user->token."'");
+		
+		# Delete their token cookie - effectively logging them out
+		setcookie("token", "", strtotime('-1 year'), '/');
+		
+		echo "You have been logged out.";
 	}
 	
 	public function profile($user_name = NULL) 

@@ -32,8 +32,12 @@ A email designated to receive messages from the server. Examples:
 	define('SYSTEM_EMAIL', 'webmaster@myapp.com'); 
 
 # Default DB name for this app
-	define('DB_NAME', "p2_arunabha_net"); 
-
+if (REMOTE_DB) {
+	define('DB_NAME', "arunabha_p2_arunabha_net"); 
+}
+else {
+	define('DB_NAME', 'p2_arunabha_net');
+}
 # Timezone
 	define('TIMEZONE', 'America/New_York');
 
