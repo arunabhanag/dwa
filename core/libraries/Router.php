@@ -35,7 +35,7 @@ class Router {
 		} else {
 
 			// requested URI not including APP_NAME or containing directories
-			$uri = $_SERVER['PHP_SELF'];
+			$uri = $_SERVER['REQUEST_URI'];
 					
 		}
 		
