@@ -19,3 +19,5 @@
 	<input type='submit'>
 
 </form> 
+
+<a href="login">Log in</a>

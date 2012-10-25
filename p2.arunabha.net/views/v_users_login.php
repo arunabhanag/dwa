@@ -11,3 +11,5 @@
 	<input type='submit'>
 
 </form> 
+
+<a href="signup">Sign up</a>

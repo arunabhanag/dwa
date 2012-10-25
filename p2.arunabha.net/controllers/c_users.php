@@ -9,26 +9,10 @@ class users_controller extends base_controller {
 	/*-------------------------------------------------------------------------------------------------
 	Access via http://yourapp.com/index/index/
 	-------------------------------------------------------------------------------------------------*/
-	public function index() {
-		
-		echo "Welcome to users page";
-		// # Any method that loads a view will commonly start with this
-		// # First, set the content of the template with a view file
-			// $this->template->content = View::instance('v_index_index');
-			
-		// # Now set the <title> tag
-			// $this->template->title = "Hello World";
-	
-		// # If this view needs any JS or CSS files, add their paths to this array so they will get loaded in the head
-			// $client_files = Array(
-						// ""
-	                    // );
-	    
-	    	// $this->template->client_files = Utils::load_client_files($client_files);   
-	      		
-		// # Render the view
-			// echo $this->template;
-
+	public function index() 
+	{
+		$this->template->content = null;
+		echo $this->template;
 	}
 	
 	public function signup()
@@ -59,7 +43,7 @@ class users_controller extends base_controller {
 		$user_id = DB::instance(DB_NAME)->insert("users", $_POST);
 		
 		#$users = DB::instance(DB_NAME)->select_rows("SELECT * FROM users");
-
+		Router::redirect("/users/profile/");
 	}
 
 	public function login() 
@@ -101,20 +85,24 @@ class users_controller extends base_controller {
 	}
 	public function logout() 
 	{
-		# Generate and save a new token for next login
-		$new_token = sha1(TOKEN_SALT.$this->user->email.Utils::generate_random_string());
+		if ($this->user)
+		{
+			# Generate and save a new token for next login
+			$new_token = sha1(TOKEN_SALT.$this->user->email.Utils::generate_random_string());
+			
+			# Create the data array we'll use with the update method
+			# In this case, we're only updating one field, so our array only has one entry
+			$data = Array("token" => $new_token);
+			
+			# Do the update
+			DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$this->user->token."'");
+			
+			# Delete their token cookie - effectively logging them out
+			setcookie("token", "", strtotime('-1 year'), '/');
+		}
 		
-		# Create the data array we'll use with the update method
-		# In this case, we're only updating one field, so our array only has one entry
-		$data = Array("token" => $new_token);
-		
-		# Do the update
-		DB::instance(DB_NAME)->update("users", $data, "WHERE token = '".$this->user->token."'");
-		
-		# Delete their token cookie - effectively logging them out
-		setcookie("token", "", strtotime('-1 year'), '/');
-		
-		echo "You have been logged out.";
+		//Re-direct to home page
+		Router::redirect("/");
 	}
 	
 	public function profile($user_name = NULL) 
