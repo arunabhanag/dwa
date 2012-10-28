@@ -18,7 +18,11 @@ class posts_controller extends base_controller {
 		# Set up view
 		$this->template->content = View::instance('v_posts_index');
 		$this->template->title   = "Posts";
-		$this->template->content->posts = array();
+		
+		#Initialize followed_posts in v_posts_index
+		$this->template->content->followed_posts = array();
+		#Initialize own_posts in v_posts_index
+		$this->template->content->own_posts = array();
 		
 		# Build a query of the users this user is following - we're only interested in their posts
 		$q = "SELECT * 
@@ -47,7 +51,7 @@ class posts_controller extends base_controller {
 		
 		# Connections string example: 10,7,8 (where the numbers are the user_ids of who this user is following)
 
-		# Now, lets build our query to grab the posts
+		# Build query to grab followed users the posts
 		$q = "SELECT * 
 			FROM posts 
 			JOIN users USING (user_id)
@@ -55,11 +59,22 @@ class posts_controller extends base_controller {
 					
 
 		# Run our query, store the results in the variable $posts
-		$posts = DB::instance(DB_NAME)->select_rows($q);
+		$followed_posts = DB::instance(DB_NAME)->select_rows($q);
 		
 		# Pass data to the view
-		$this->template->content->posts = $posts;
+		$this->template->content->followed_posts = $followed_posts;
 		
+		# Build our query to grab this users own posts
+		$q = "SELECT * 
+			FROM posts 
+			JOIN users USING (user_id)
+			WHERE posts.user_id = ".$this->user->user_id." ORDER BY posts.created DESC";
+					
+
+		# Run  query, store the results in the variable $posts
+		$own_posts = DB::instance(DB_NAME)->select_rows($q);
+		$this->template->content->own_posts = $own_posts;
+
 		# Render view
 		echo $this->template;
 		
@@ -89,8 +104,7 @@ class posts_controller extends base_controller {
 		# Note we didn't have to sanitize any of the $_POST data because we're using the insert method which does it for us
 		DB::instance(DB_NAME)->insert('posts', $_POST);
 		
-		# Quick and dirty feedback
-		echo "Your post has been added. <a href='/posts/add'>Add another?</a>";	
+		Router::redirect("/posts");
 	}
 	
 	public function users() {

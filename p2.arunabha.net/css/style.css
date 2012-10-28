@@ -12,3 +12,54 @@ p
 font-family:"Times New Roman";
 font-size:20px;
 }
+
+.error 
+{
+color:rgb(255,0,0);
+}
+
+div.menu {
+	list-style: none;
+	margin:0;
+	padding:0;
+	background-color:#6caafc;
+	}
+	
+ul.menu
+{
+list-style-type:none;
+margin:0;
+padding:0;
+overflow:hidden;
+}
+
+li.menu
+{
+float:left;
+}
+a.menu:link,a.menu:visited
+{
+display:block;
+width:auto;
+font-weight:bold;
+color:#FFFFFF;
+text-align:center;
+padding-left:6px;
+padding-right:6px;
+padding-top:4px;
+padding-bottom:4px;
+text-decoration:none;
+text-transform:uppercase;
+}
+a.menu:hover,a.menu:active
+{
+background-color:#217ffa;
+}
+
+div.posts
+{
+float:left;
+padding-left:6px;
+padding-right:6px;
+}
+

@@ -15,10 +15,14 @@ class users_controller extends base_controller {
 		echo $this->template;
 	}
 	
-	public function signup()
+	public function signup($error = NULL)
 	{
 		# Setup view
 		$this->template->content = View::instance('v_users_signup');
+		# Pass error argument if any
+		$this->template->content->error = $error;
+
+		# Set page title
 		$this->template->title = "Signup";
 
 		# Render template
@@ -27,10 +31,25 @@ class users_controller extends base_controller {
 	
 	public function p_signup()
 	{
-		
 		# Dump out the results of POST to see what the form submitted
 		//print_r($_POST);
+
+		# Search the db for this email
+		# Retrieve the token if it's available
+		$q = "SELECT token 
+			FROM users 
+			WHERE email = '".$_POST['email']."'";
+			
+		$token = DB::instance(DB_NAME)->select_field($q);
 		
+		#If token exists, an user already there with this email id. Redirect to signup page with an error
+		if($token) 
+		{
+			Router::redirect("/users/signup/error");
+			return;
+		}
+
+			
 		# Encrypt the password	
 		$_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']);	
 	
@@ -42,14 +61,21 @@ class users_controller extends base_controller {
 		# Insert this user into the database
 		$user_id = DB::instance(DB_NAME)->insert("users", $_POST);
 		
-		#$users = DB::instance(DB_NAME)->select_rows("SELECT * FROM users");
+		#Store this token in a cookie
+		setcookie("token", $_POST['token'], strtotime('+2 week'), '/');
+		
 		Router::redirect("/users/profile/");
 	}
 
-	public function login() 
+	public function login($error = NULL) 
 	{
 		# Setup view
 		$this->template->content = View::instance('v_users_login');
+		
+		# Pass error argument if any
+		$this->template->content->error = $error;
+		
+		# Set page title
 		$this->template->title = "Login";
 
 		# Render template
@@ -68,18 +94,17 @@ class users_controller extends base_controller {
 			WHERE email = '".$_POST['email']."' 
 			AND password = '".$_POST['password']."'";
 		
-		//echo $q;
-		//return;
 		$token = DB::instance(DB_NAME)->select_field($q);	
 		
-		# If we didn't get a token back, login failed
+		# If we didn't get a token back, login failed. Send user back to the login page with an error
 		if(!$token) 
 		{
-			Router::redirect("/users/login/"); //Send them back to the login page
+			Router::redirect("/users/login/error");
+			return;
 		}
 		else 
 		{
-			@setcookie("token", $token, strtotime('+2 week'), '/'); //Store this token in a cookie
+			setcookie("token", $token, strtotime('+2 week'), '/'); //Store this token in a cookie
 			Router::redirect("/users/profile/"); //Send them to the main page - or whever you want them to go
 		}
 	}

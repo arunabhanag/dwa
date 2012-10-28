@@ -16,8 +16,13 @@
 	<input type='password' name='password'>
 	<br><br>
 	
+	<? if($error): ?>
+		<div class='error'>
+			User email-id already used. Please use a different e-mail id.
+		</div>
+		<br>
+	<? endif; ?>
+	
 	<input type='submit'>
 
 </form> 
-
-<a href="login">Log in</a>

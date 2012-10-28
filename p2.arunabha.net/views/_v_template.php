@@ -15,22 +15,22 @@
 </head>
 
 <body>	
-	<div id='menu'>
+	<div class='menu'>
 	
 		<!-- Menu for users who are logged in -->
 		<? if($user): ?>
-			
-			<a href='/users/logout'>Logout</a>
-			<a href='/posts/users/'>Change who you're following</a>
-			<a href='/posts/'>View posts</a>
-			<a href='/posts/add'>Add a new post</a>
-		
+			<ul class='menu'>
+			<li class='menu'><a href='/users/logout' class='menu'>Logout</a></li>
+			<li class='menu'><a href='/posts/users/' class='menu'>Users</a></li>
+			<li class='menu'><a href='/posts/' class='menu'>View posts</a></li>
+			<li class='menu'><a href='/posts/add' class='menu'>Add post</a></li>
+			</ul>
 		<!-- Menu options for users who are not logged in -->	
 		<? else: ?>
-		
-			<a href='/users/signup'>Sign up</a>
-			<a href='/users/login'>Log in</a>
-		
+		<ul class='menu'>
+			<li class='menu'><a href='/users/signup' class='menu'>Sign up</a></li>
+			<li class='menu'><a href='/users/login' class='menu'>Log in</a></li>
+		</ul>
 		<? endif; ?>
 	
 	</div>
