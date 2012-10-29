@@ -20,10 +20,10 @@
 		<!-- Menu for users who are logged in -->
 		<? if($user): ?>
 			<ul class='menu'>
-			<li class='menu'><a href='/users/logout' class='menu'>Logout</a></li>
+			<li class='menu'><a href='/' class='menu'>Home</a></li>
 			<li class='menu'><a href='/posts/users/' class='menu'>Users</a></li>
-			<li class='menu'><a href='/posts/' class='menu'>View posts</a></li>
-			<li class='menu'><a href='/posts/add' class='menu'>Add post</a></li>
+			<li class='menu'><a href='/users/profile' class='menu'>Profile</a></li>
+			<li class='menu'><a href='/users/logout' class='menu'>Log out</a></li>
 			</ul>
 		<!-- Menu options for users who are not logged in -->	
 		<? else: ?>

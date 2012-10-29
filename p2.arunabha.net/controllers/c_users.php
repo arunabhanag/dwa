@@ -9,8 +9,9 @@ class users_controller extends base_controller {
 	/*-------------------------------------------------------------------------------------------------
 	Access via http://yourapp.com/index/index/
 	-------------------------------------------------------------------------------------------------*/
-	public function index() 
+	public function index($user_id = 0) 
 	{
+		# Setup view
 		$this->template->content = null;
 		echo $this->template;
 	}
@@ -108,6 +109,7 @@ class users_controller extends base_controller {
 			Router::redirect("/users/profile/"); //Send them to the main page - or whever you want them to go
 		}
 	}
+	
 	public function logout() 
 	{
 		if ($this->user)
@@ -130,22 +132,64 @@ class users_controller extends base_controller {
 		Router::redirect("/");
 	}
 	
-	public function profile($user_name = NULL) 
+	public function profile($user_id = 0) 
 	{
-		# If user is not logged in, redirect to log-in page
-		if(!$this->user) 
+		# Show private of public profile
+		$private_profile = false;
+		
+		#Define pofile_user variable.
+		$pofile_user = null;
+		
+		#If user_id provided, find the user from database
+		if($user_id != 0) 
 		{
-			Router::redirect("/users/login/");
+			$q = "SELECT * 
+			FROM users 
+			WHERE user_id = '".$user_id."'
+			LIMIT 1";
+			$pofile_user = DB::instance(DB_NAME)->select_row($q, "object");
+		}
+		else if ($this->user) # If user_id not provided, show full profile of logged in user
+		{
+			$pofile_user = $this->user;
+			$private_profile = true;
+		}
+		
+		#No user found, direct to home page
+		if (!$pofile_user)
+		{
+			Router::redirect("/");
 		}
 		
 		# Setup view
-		$full_name = $this->user->first_name." ".$this->user->last_name;
-		$this->template->content = View::instance('v_users_profile');
-		$this->template->content->user_name = $full_name;
-		$this->template->title   = "Profile of ".$full_name;
+		$this->template->content = View::instance('v_users_profile');		
+		$this->template->title   = "Profile of ".$pofile_user->first_name." ".$pofile_user->last_name;
+		$this->template->content->user = $pofile_user;
+		$this->template->content->private_profile = $private_profile;
 		
-		# Render template
+		// # Render template
 		echo $this->template;
+	}
+	
+	# Deletes an user acount
+	public function delete() 
+	{
+		if ($this->user)
+		{
+			$where_condition = 'WHERE user_id = '.$this->user->user_id;
+			DB::instance(DB_NAME)->delete('users', $where_condition);
+			DB::instance(DB_NAME)->delete('posts', $where_condition);
+			DB::instance(DB_NAME)->delete('users_users', $where_condition);
+			
+			$where_condition_followed = 'WHERE user_id_followed = '.$this->user->user_id;
+			DB::instance(DB_NAME)->delete('users_users', $where_condition_followed);
+			
+			# Delete their token cookie - effectively logging them out
+			setcookie("token", "", strtotime('-1 year'), '/');
+		}
+		
+		#Re-direct to home page
+		Router::redirect("/");
 	}
 } // end class
 

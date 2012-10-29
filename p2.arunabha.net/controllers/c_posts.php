@@ -9,87 +9,15 @@ class posts_controller extends base_controller {
 		# Make sure user is logged in if they want to use anything in this controller
 		if(!$this->user) 
 		{
-			die("Members only. <a href='/users/login'>Login</a>");
+			#Re-direct to home page
+			Router::redirect("/");
 		}
 	}
 	
-	public function index() {
-		
-		# Set up view
-		$this->template->content = View::instance('v_posts_index');
-		$this->template->title   = "Posts";
-		
-		#Initialize followed_posts in v_posts_index
-		$this->template->content->followed_posts = array();
-		#Initialize own_posts in v_posts_index
-		$this->template->content->own_posts = array();
-		
-		# Build a query of the users this user is following - we're only interested in their posts
-		$q = "SELECT * 
-			FROM users_users
-			WHERE user_id = ".$this->user->user_id;
-			
-		# Execute our query, storing the results in a variable $connections
-		$connections = DB::instance(DB_NAME)->select_rows($q);
-		
-		if (count($connections) == 0)
-		{
-			echo $this->template;
-			return;
-		}
-		
-		# In order to query for the posts we need, we're going to need a string of user id's, separated by commas
-		# To create this, loop through our connections array
-		$connections_string = "";
-		foreach($connections as $connection) 
-		{
-			$connections_string .= $connection['user_id_followed'].",";
-		}
-		
-		# Remove the final comma 
-		$connections_string = substr($connections_string, 0, -1);
-		
-		# Connections string example: 10,7,8 (where the numbers are the user_ids of who this user is following)
-
-		# Build query to grab followed users the posts
-		$q = "SELECT * 
-			FROM posts 
-			JOIN users USING (user_id)
-			WHERE posts.user_id IN (".$connections_string.")"; # This is where we use that string of user_ids we created
-					
-
-		# Run our query, store the results in the variable $posts
-		$followed_posts = DB::instance(DB_NAME)->select_rows($q);
-		
-		# Pass data to the view
-		$this->template->content->followed_posts = $followed_posts;
-		
-		# Build our query to grab this users own posts
-		$q = "SELECT * 
-			FROM posts 
-			JOIN users USING (user_id)
-			WHERE posts.user_id = ".$this->user->user_id." ORDER BY posts.created DESC";
-					
-
-		# Run  query, store the results in the variable $posts
-		$own_posts = DB::instance(DB_NAME)->select_rows($q);
-		$this->template->content->own_posts = $own_posts;
-
-		# Render view
-		echo $this->template;
-		
-	}	
-	
-	public function add() 
+	public function index() 
 	{
-		# Setup view
-		$this->template->content = View::instance('v_posts_add');
-		$this->template->title   = "Add a new post";
-			
-		# Render template
-		echo $this->template;
-	
-	}
+		Router::redirect("/");		
+	}	
 	
 	public function p_add() 
 	{
@@ -104,7 +32,7 @@ class posts_controller extends base_controller {
 		# Note we didn't have to sanitize any of the $_POST data because we're using the insert method which does it for us
 		DB::instance(DB_NAME)->insert('posts', $_POST);
 		
-		Router::redirect("/posts");
+		Router::redirect("/");
 	}
 	
 	public function users() {
@@ -113,9 +41,10 @@ class posts_controller extends base_controller {
 		$this->template->content = View::instance("v_posts_users");
 		$this->template->title   = "Users";
 		
-		# Build our query to get all the users
+		# Build our query to get all the users except this user
 		$q = "SELECT *
-			FROM users";
+			FROM users
+			WHERE user_id <> ".$this->user->user_id;
 			
 		# Execute the query to get all the users. Store the result array in the variable $users
 		$users = DB::instance(DB_NAME)->select_rows($q);

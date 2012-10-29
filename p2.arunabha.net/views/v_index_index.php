@@ -13,19 +13,17 @@
 <?php
 	if (count($followed_posts) == 0)
 	{
-		echo "No post from your followers!!";
+		echo "No post from the users you are following!!";
 	}
 ?>
 
 <?php foreach($followed_posts as $followed_posts): ?>
-	
-	<h3><?=$followed_posts['first_name']?> <?=$followed_posts['last_name']?> on
-	<?php echo Time::display($followed_posts['created']);?>
-	</h3>
 	<?=$followed_posts['content']?>
-	
-	<br><br>
-	
+	<br>
+	<small>
+	<?php echo $followed_posts['first_name']." ".Time::display($followed_posts['created']);?>
+	</small>
+	<br>
 <? endforeach; ?>
 
 </div>
@@ -41,14 +39,12 @@
 ?>
 
 <?php foreach($own_posts as $own_posts): ?>
-	
-	<h3>posted
-	<?php echo Time::display($own_posts['created']);?>
-	</h3>
 	<?=$own_posts['content']?>
-	
-	<br><br>
-	
+	<br>
+	<small>
+	<?php echo "..".Time::display($own_posts['created']);?>
+	</small>
+	<br>
 <? endforeach; ?>
 
 </div>
