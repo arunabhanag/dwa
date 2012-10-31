@@ -43,7 +43,7 @@ class users_controller extends base_controller {
 			
 		$token = DB::instance(DB_NAME)->select_field($q);
 		
-		#If token exists, an user already there with this email id. Redirect to signup page with an error
+		#If token exists, an user already signed-up with this email id. Redirect to signup page with an error
 		if($token) 
 		{
 			Router::redirect("/users/signup/error");
@@ -59,13 +59,14 @@ class users_controller extends base_controller {
 		$_POST['modified'] = Time::now();
 		$_POST['token']    = sha1(TOKEN_SALT.$_POST['email'].Utils::generate_random_string());
 		
+		# User is not active yet.
+		$_POST['active'] = 0;
+			
 		# Insert this user into the database
 		$user_id = DB::instance(DB_NAME)->insert("users", $_POST);
-		
-		#Store this token in a cookie
-		setcookie("token", $_POST['token'], strtotime('+2 week'), '/');
-		
-		Router::redirect("/users/profile/");
+
+		# Send an email to the user to activate the account.		
+		$this->activation_msg($_POST['first_name'], $_POST['email'], $_POST['token']);			
 	}
 
 	public function login($error = NULL) 
@@ -89,24 +90,28 @@ class users_controller extends base_controller {
 		$_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']);
 		
 		# Search the db for this email and password
-		# Retrieve the token if it's available
-		$q = "SELECT token 
+		$q = "SELECT * 
 			FROM users 
 			WHERE email = '".$_POST['email']."' 
-			AND password = '".$_POST['password']."'";
-		
-		$token = DB::instance(DB_NAME)->select_field($q);	
-		
-		# If we didn't get a token back, login failed. Send user back to the login page with an error
-		if(!$token) 
+			AND password = '".$_POST['password']."'
+			LIMIT 1";
+		$user = DB::instance(DB_NAME)->select_row($q, "object");
+			
+		# If we didn't get an user, login failed. Send user back to the login page with an error
+		if(!$user) 
 		{
 			Router::redirect("/users/login/error");
 			return;
 		}
-		else 
+		else if ($user->active == 0) //Account not yet active
 		{
-			setcookie("token", $token, strtotime('+2 week'), '/'); //Store this token in a cookie
-			Router::redirect("/users/profile/"); //Send them to the main page - or whever you want them to go
+			# Send an email to the user to activate the account.
+			$this->activation_msg($user->first_name, $user->email, $user->token);
+		}
+		else //Login successful
+		{
+			setcookie("token", $user->token, strtotime('+2 week'), '/'); //Store this token in a cookie
+			Router::redirect("/"); //Send them to the main page 
 		}
 	}
 	
@@ -126,6 +131,18 @@ class users_controller extends base_controller {
 			
 			# Delete their token cookie - effectively logging them out
 			setcookie("token", "", strtotime('-1 year'), '/');
+		}
+		
+		//Re-direct to home page
+		Router::redirect("/");
+	}
+	
+	public function activate($token = NULL) 
+	{
+		if ($token)
+		{
+			DB::instance(DB_NAME)->update("users", Array("active" => 1), "WHERE token = '".$token."'");
+			setcookie("token", $token, strtotime('+2 week'), '/'); //Store this token in a cookie
 		}
 		
 		//Re-direct to home page
@@ -190,6 +207,46 @@ class users_controller extends base_controller {
 		
 		#Re-direct to home page
 		Router::redirect("/");
+	}
+	
+	private function activation_msg($user_name, $email, $token)
+	{
+		$a_msg = "Please click on this link to activate your account: ".APP_URL."/users/activate/".$token;
+
+		if (ENABLE_OUTGOING_EMAIL)
+		{
+			# Send confirmation email
+			# Build a multi-dimension array of recipients of this email
+			$to[] = Array("name" => $user_name, "email" => $email);
+
+			# Build a single-dimension array of who this email is coming from
+			$from = Array("name" => APP_NAME, "email" => APP_EMAIL);
+
+			# Subject
+			$subject = "Welcome to the microblogging web application";
+
+			# Body
+			$body = $a_msg;
+			
+			# With everything set, send the email
+			$email = Email::send($to, $from, $subject, $body, true);
+			
+			# Setup view
+			$this->template->content = View::instance('v_users_activate');
+			# Pass email address
+			$this->template->content->email = $_POST['email'];
+		
+			# Set page title
+			$this->template->title = "Account activation";
+		}
+		else
+		{
+			# Setup view
+			$this->template->content = $a_msg;
+		}
+
+		# Render view
+		echo $this->template;
 	}
 } // end class
 

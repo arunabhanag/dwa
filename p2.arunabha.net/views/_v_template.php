@@ -15,28 +15,34 @@
 </head>
 
 <body>	
-	<div class='menu'>
+	<div class='menubar'>
 	
 		<!-- Menu for users who are logged in -->
 		<? if($user): ?>
-			<ul class='menu'>
-			<li class='menu'><a href='/' class='menu'>Home</a></li>
-			<li class='menu'><a href='/posts/users/' class='menu'>Users</a></li>
-			<li class='menu'><a href='/users/profile' class='menu'>Profile</a></li>
-			<li class='menu'><a href='/users/logout' class='menu'>Log out</a></li>
+			<ul>
+			<li><a href='/'>Home</a></li>
+			<li><a href='/posts/users/'>Users</a></li>
+			<li><a href='/users/profile'>Profile</a></li>
+			<li><a href='/users/logout'>Log out</a></li>
 			</ul>
 		<!-- Menu options for users who are not logged in -->	
 		<? else: ?>
-		<ul class='menu'>
-			<li class='menu'><a href='/users/signup' class='menu'>Sign up</a></li>
-			<li class='menu'><a href='/users/login' class='menu'>Log in</a></li>
+		<ul>
+			<li><a href='/users/signup'>Sign up</a></li>
+			<li><a href='/users/login'>Log in</a></li>
 		</ul>
 		<? endif; ?>
-	
+	<? if($user): ?>
+		<h3 class='username'><?=$user->first_name." ".$user->last_name;?></h3>
+	<?endif;?>
 	</div>
-	
-	<br>
-	<?=$content;?> 
-
+	<br><br>
+	<div class='content'>
+		<? if($content) :?>
+			<?=$content;?>
+			<?else:?> 
+				<p>Welcome to micro-blogger. This is a class project for CSCIE-75. Please log-in or sign-up to proceed</p>
+		<?endif;?>
+	</div>
 </body>
 </html>
