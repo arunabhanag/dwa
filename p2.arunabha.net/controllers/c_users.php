@@ -237,14 +237,14 @@ class users_controller extends base_controller {
 			# Build a single-dimension array of who this email is coming from
 			$from = Array("name" => APP_NAME, "email" => APP_EMAIL);
 
-			# Set email content
-			$this->email_template->content = View::instance('e_users_activate');
+			# Subject
+			$subject = "Welcome to the microblogging web application";
 			
-			# Set the url
-			$this->email_template->content->url = $url;
-			
+			# Body
+			$body = "Please click on this <a href=".$url.">link</a> to activate your account.";
+
 			# With everything set, send the email
-			$email = Email::send($to, $from, $this->email_template->content->subject, $this->email_template->content->body, true);
+			$email = Email::send($to, $from, $subject, $body, true);
 			
 			# Setup view to notify user about the e-mail
 			$this->template->content = View::instance('v_users_activate');
