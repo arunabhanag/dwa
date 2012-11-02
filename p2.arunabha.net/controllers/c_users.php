@@ -151,7 +151,7 @@ class users_controller extends base_controller {
 	
 	public function profile($user_id = 0) 
 	{
-		# Show private of public profile
+		# Show private or public profile
 		$private_profile = false;
 		
 		#Define pofile_user variable.
@@ -166,13 +166,13 @@ class users_controller extends base_controller {
 			LIMIT 1";
 			$pofile_user = DB::instance(DB_NAME)->select_row($q, "object");
 		}
-		else if ($this->user) # If user_id not provided, show full profile of logged in user
+		else if ($this->user) # If user_id not provided, show full profile of the logged in user
 		{
 			$pofile_user = $this->user;
 			$private_profile = true;
 		}
 		
-		#No user found, direct to home page
+		#No user found, redirect to home page
 		if (!$pofile_user)
 		{
 			Router::redirect("/");
@@ -184,7 +184,16 @@ class users_controller extends base_controller {
 		$this->template->content->user = $pofile_user;
 		$this->template->content->private_profile = $private_profile;
 		
-		// # Render template
+		#Find all the posts of this user
+		$q = "SELECT * 
+		FROM posts 
+		JOIN users USING (user_id)
+		WHERE posts.user_id = ".$pofile_user->user_id." ORDER BY posts.created DESC";
+					
+		# Run  query, store the results in the variable $posts
+		$this->template->content->posts = DB::instance(DB_NAME)->select_rows($q);
+		
+		# Render template
 		echo $this->template;
 	}
 	
@@ -194,10 +203,14 @@ class users_controller extends base_controller {
 		if ($this->user)
 		{
 			$where_condition = 'WHERE user_id = '.$this->user->user_id;
+			# Delete from users table
 			DB::instance(DB_NAME)->delete('users', $where_condition);
+			# Delete all the posts
 			DB::instance(DB_NAME)->delete('posts', $where_condition);
+			# Stop following other users
 			DB::instance(DB_NAME)->delete('users_users', $where_condition);
 			
+			# Stop other users following this
 			$where_condition_followed = 'WHERE user_id_followed = '.$this->user->user_id;
 			DB::instance(DB_NAME)->delete('users_users', $where_condition_followed);
 			
@@ -211,8 +224,10 @@ class users_controller extends base_controller {
 	
 	private function activation_msg($user_name, $email, $token)
 	{
-		$a_msg = "Please click on this link to activate your account: ".APP_URL."/users/activate/".$token;
+		#Activation url
+		$url = APP_URL."/users/activate/".$token;
 
+		#Live sever, email enabled
 		if (ENABLE_OUTGOING_EMAIL)
 		{
 			# Send confirmation email
@@ -222,16 +237,16 @@ class users_controller extends base_controller {
 			# Build a single-dimension array of who this email is coming from
 			$from = Array("name" => APP_NAME, "email" => APP_EMAIL);
 
-			# Subject
-			$subject = "Welcome to the microblogging web application";
-
-			# Body
-			$body = $a_msg;
+			# Set email content
+			$this->email_template->content = View::instance('e_users_activate');
+			
+			# Set the url
+			$this->email_template->content->url = $url;
 			
 			# With everything set, send the email
-			$email = Email::send($to, $from, $subject, $body, true);
+			$email = Email::send($to, $from, $this->email_template->content->subject, $this->email_template->content->body, true);
 			
-			# Setup view
+			# Setup view to notify user about the e-mail
 			$this->template->content = View::instance('v_users_activate');
 			# Pass email address
 			$this->template->content->email = $_POST['email'];
@@ -239,10 +254,10 @@ class users_controller extends base_controller {
 			# Set page title
 			$this->template->title = "Account activation";
 		}
-		else
+		else //Local sever, email not enabled. Just give the link directly
 		{
 			# Setup view
-			$this->template->content = $a_msg;
+			$this->template->content = "Please click on this link to activate your account: ".$url;
 		}
 
 		# Render view

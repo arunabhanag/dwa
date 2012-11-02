@@ -16,6 +16,7 @@ class posts_controller extends base_controller {
 	
 	public function index() 
 	{
+		#There is nothing to show. Send back to home page
 		Router::redirect("/");		
 	}	
 	
@@ -31,11 +32,13 @@ class posts_controller extends base_controller {
 		# Insert
 		# Note we didn't have to sanitize any of the $_POST data because we're using the insert method which does it for us
 		DB::instance(DB_NAME)->insert('posts', $_POST);
-		
+
+		# Redirect to home page
 		Router::redirect("/");
 	}
 	
-	public function users() {
+	public function users() 
+	{
 
 		# Set up the view
 		$this->template->content = View::instance("v_posts_users");
@@ -49,7 +52,7 @@ class posts_controller extends base_controller {
 		# Execute the query to get all the users. Store the result array in the variable $users
 		$users = DB::instance(DB_NAME)->select_rows($q);
 		
-		# Build our query to figure out what connections does this user already have? I.e. who are they following
+		# Build our query to figure out what connections this user already has.
 		$q = "SELECT * 
 			FROM users_users
 			WHERE user_id = ".$this->user->user_id;

@@ -1,3 +1,4 @@
+<!-- Signup form -->
 <form method='POST' action='/users/p_signup'>
 
 	First Name<br>
@@ -16,6 +17,7 @@
 	<input type='password' name='password'>
 	<br><br>
 	
+	<!-- Show signup error -->
 	<? if($error): ?>
 		<div class='error'>
 			User email-id already used. Please use a different e-mail id.

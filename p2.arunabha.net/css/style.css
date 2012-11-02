@@ -79,3 +79,29 @@ color:rgb(255,0,0);
 	padding-left:60px;
 }
 
+.posts ul
+{
+	list-style-type:none;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+
+.posts li:nth-child(odd) 
+{ 
+	background-color:#6caafc; 
+}
+
+.time, .name
+{
+	text-align:right;
+	font-size:small;
+}
+
+.welcome
+{
+	font-size:200%;
+}
+
+
+
