@@ -32,11 +32,19 @@ class users_controller extends base_controller {
 	
 	public function p_signup()
 	{
-		# Dump out the results of POST to see what the form submitted
-		//print_r($_POST);
-
-		# Search the db for this email
-		# Retrieve the token if it's available
+		# Check if any field is missing
+		if(!$_POST['first_name'] || !$_POST['last_name'] || !$_POST['password'] || !$_POST['email']) 
+		{
+			Router::redirect("/users/signup/fields_missing");
+		}
+		
+		#Check for valid email id
+		if(false == PHPMailer::ValidateAddress($_POST['email']))
+		{
+			Router::redirect("/users/signup/email_invalid");
+		}
+		
+		# Search the db for this email, Retrieve the token if it's available
 		$q = "SELECT token 
 			FROM users 
 			WHERE email = '".$_POST['email']."'";
@@ -46,15 +54,14 @@ class users_controller extends base_controller {
 		#If token exists, an user already signed-up with this email id. Redirect to signup page with an error
 		if($token) 
 		{
-			Router::redirect("/users/signup/error");
-			return;
+			Router::redirect("/users/signup/email_used");
 		}
 
 			
 		# Encrypt the password	
 		$_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']);	
 	
-		# More data we want stored with the user	
+		# More data we want to store with the user	
 		$_POST['created']  = Time::now();
 		$_POST['modified'] = Time::now();
 		$_POST['token']    = sha1(TOKEN_SALT.$_POST['email'].Utils::generate_random_string());
@@ -226,7 +233,8 @@ class users_controller extends base_controller {
 	{
 		#Activation url
 		$url = APP_URL."/users/activate/".$token;
-
+		$msg = "Please click on this <a href=".$url.">link</a> to activate your account.";
+		
 		#Live sever, email enabled
 		if (ENABLE_OUTGOING_EMAIL)
 		{
@@ -241,13 +249,14 @@ class users_controller extends base_controller {
 			$subject = "Welcome to the microblogging web application";
 			
 			# Body
-			$body = "Please click on this <a href=".$url.">link</a> to activate your account.";
+			$body = $msg;
 
 			# With everything set, send the email
 			$email = Email::send($to, $from, $subject, $body, true);
 			
 			# Setup view to notify user about the e-mail
 			$this->template->content = View::instance('v_users_activate');
+			
 			# Pass email address
 			$this->template->content->email = $_POST['email'];
 		
@@ -257,7 +266,7 @@ class users_controller extends base_controller {
 		else //Local sever, email not enabled. Just give the link directly
 		{
 			# Setup view
-			$this->template->content = "Please click on this link to activate your account: ".$url;
+			$this->template->content = $msg;
 		}
 
 		# Render view

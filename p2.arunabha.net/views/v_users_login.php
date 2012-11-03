@@ -1,14 +1,6 @@
 <!-- log in form -->
 <form method='POST' action='/users/p_login'>
 
-	Email<br>
-	<input type='text' name='email'>
-	<br><br>
-	
-	Password<br>
-	<input type='password' name='password'>
-	<br><br>
-	
 	<!-- log in error -->
 	<? if($error): ?>
 		<div class='error'>
@@ -16,7 +8,15 @@
 		</div>
 		<br>
 	<? endif; ?>
+
+	Email<br>
+	<input type='text' name='email'>
+	<br><br>
 	
+	Password<br>
+	<input type='password' name='password'>
+	<br><br>
+
 	<input type='submit'>
 
 </form> 

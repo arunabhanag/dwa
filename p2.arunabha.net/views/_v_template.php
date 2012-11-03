@@ -45,8 +45,8 @@
 				<?=$content;?>
 			<!-- Show welcome message if user has not logged in and there is nothing else to show-->
 			<?elseif(!$user):?> 
-				<p class="welcome">Welcome to micro-blogger. This is a class project for CSCIE-75. </p>
-				<p>Please <a href='/users/login'>Log in</a> or <a href='/users/signup'>Sign up</a> to proceed.</p>
+				<p class="welcome">Welcome to Arunabha's micro-blogging site.</p>
+				<p>Please <a href='/users/login'>Log in</a> or <a href='/users/signup'>Sign up</a></p>
 			<?endif;?>
 		</div>
 </body>
