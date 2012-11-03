@@ -79,6 +79,10 @@ color:rgb(255,0,0);
 	padding-left:60px;
 }
 
+.posts div
+{
+	width: 400px;
+}
 .posts ul
 {
 	list-style-type:none;

@@ -31,6 +31,6 @@
 	<input type='password' name='password'>
 	<br><br>
 	
-	<input type='submit'>
+	<input type='submit'  value="Sign up">
 
 </form> 

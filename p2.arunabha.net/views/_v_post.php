@@ -1,6 +1,6 @@
 <div class="posts">
 	<!-- Print the heading, e.g. User X's posts-->
-	<h2><?php echo $heading?></h2>
+	<h3><?php echo $heading?></h3>
 	
 	<!-- Check if there is any post to show-->
 	<?php

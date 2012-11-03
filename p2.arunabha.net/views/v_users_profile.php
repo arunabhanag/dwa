@@ -11,7 +11,7 @@
 <!-- show all the posts made by this user -->
 <?php 
 	$posts_view = View::instance('_v_post');
-	$posts_view->heading = $user->first_name."'s posts";
+	$posts_view->heading = $user->first_name."'s all posts";
 	$posts_view->posts = $posts;
 	echo $posts_view;
 ?>
