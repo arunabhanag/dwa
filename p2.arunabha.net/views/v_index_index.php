@@ -10,8 +10,6 @@
 <?php 
 	$posts  = View::instance('_v_post');
 	$posts->heading = "Your last post";
-	if ($own_posts && count($own_posts) > 1)
-		$own_posts = array_slice($own_posts, 0, 1);
 	$posts->posts = $own_posts;
 	echo $posts;
 ?>

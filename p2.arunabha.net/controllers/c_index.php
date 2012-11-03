@@ -27,11 +27,11 @@ class index_controller extends base_controller {
 		$this->template->content = View::instance('v_index_index');
 		$this->template->title   = $this->user->first_name." ".$this->user->last_name;
 		
-		#Query to find all the posts made by this user
+		#Query to find the last post made by this user
 		$q = "SELECT * 
 			FROM posts 
 			JOIN users USING (user_id) 
-			WHERE posts.user_id = ".$this->user->user_id." ORDER BY posts.created DESC";
+			WHERE posts.user_id = ".$this->user->user_id." ORDER BY posts.created DESC  LIMIT 1";
 
 		# Run our query, store the results in the variable $own_posts
 		$own_posts = DB::instance(DB_NAME)->select_rows($q);
