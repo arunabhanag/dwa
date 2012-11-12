@@ -1,0 +1,27 @@
+body
+{
+	background-color:#d0e4fe;
+	min-width: 950px;
+	margin: 0 auto;
+}
+
+canvas
+{
+	background-color:white;
+	border: 1px solid black;
+}
+
+#view
+{
+	margin-top:50px;
+	margin-left:100px;
+	float:left;
+}
+
+#panel
+{
+	border: 1px solid black;
+	margin-top:50px;
+	margin-left:100px;
+	float:left;
+}
