@@ -126,7 +126,7 @@ CanvasState.prototype.draw = function()
 	ctx.strokeStyle = 'red';
 	while(t <= 1.0)
 	{
-		console.log(t);
+		//console.log(t);
 		var cp = this.pointOnCurve(t);
 		if (t < delta)
 		{
