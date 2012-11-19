@@ -1,23 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Bezier Curve</title>
+	<title>Bézier Curve App</title>
 
-<link rel="stylesheet" type="text/css" href="/css/style.css" />
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-<script type="text/javascript" src="/js/bezier.js"></script>
+	<link rel="stylesheet" type="text/css" href="/css/style.css" />
+	<link rel="shortcut icon" href="/images/icon.ico">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/bezier.js"></script>
 
-<meta name="description" content="Bezier Curve using JS">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="Bezier Curve using JS">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 
-	<body>
+<body>
+	<div id="wrapper">
+		<div id="header">
+			<h1>Bézier Curve App</h1>
+		</div>
 		<div id="view">
 		</div>
-		<div id="panel">
-			<input id="clearCanvas" type='submit' value="Clear Canvas"/> <br>
+		<div id="buttons">
+			<input id="clearCanvas" type='submit' value="Clear Canvas"/>
 			<input id="deleteLast" type='submit' value="Delete Last Point"/>
 		</div>
-	</body>
+		
+		<div id="insc">
+			<p>
+				Click on the canvas to insert a control point. Create minimum 3 points.<br>
+				Red curve shows Bézier-Curve; black lines represent control polygon.<br>
+				Select and drag the control points to modify the Bézier-Curve.<br>
+				About Bézier-Curve: <a href="http://en.wikipedia.org/wiki/Bezier_curve">http://en.wikipedia.org/wiki/Bezier_curve</a>
+			</p>
+		</div>		
+	</div>
+</body>
 </html>
 

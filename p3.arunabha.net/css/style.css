@@ -1,8 +1,23 @@
+#wrapper {
+	width:600px;
+	margin:0px auto;
+}
+
 body
 {
 	background-color:#d0e4fe;
-	min-width: 950px;
-	margin: 0 auto;
+	margin: 0px auto;
+	font-family: arial, sans, sans-serif;
+}
+
+div
+{
+	margin-top:10px;
+}
+
+div#header {
+	text-align: center;
+	background-color:#6caafc;
 }
 
 canvas
@@ -11,17 +26,8 @@ canvas
 	border: 1px solid black;
 }
 
-#view
+#insc
 {
-	margin-top:50px;
-	margin-left:100px;
-	float:left;
+
 }
 
-#panel
-{
-	border: 1px solid black;
-	margin-top:50px;
-	margin-left:100px;
-	float:left;
-}
