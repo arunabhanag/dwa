@@ -11,7 +11,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	   return;
 	}
 
-	//Set canvas size
+	//Set canvas size (Setting canvas size in CSS does not work)
 	canv.width = 600;
 	canv.height = 400;
 	
