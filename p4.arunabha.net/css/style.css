@@ -1,0 +1,60 @@
+#wrapper {
+	width:600px;
+	margin:0px auto;
+}
+
+body
+{
+	background-color:#d0e4fe;
+	margin: 0px auto;
+	font-family: arial, sans, sans-serif;
+}
+
+div
+{
+	margin-top:10px;
+}
+
+div#header {
+	text-align: center;
+	background-color:#6caafc;
+}
+
+div#lpanel {
+	width:64px;
+	float:left;
+}
+
+div#view {
+	float:left;
+}
+
+div#rpanel {
+	width:80px;
+	float:left;
+}
+
+div#line {
+	background-image:url('/images/LineIcon.png');
+}
+
+div#rectangle {
+	background-image:url('/images/RectCornerIcon.png');
+}
+
+div#circleCenter {
+	background-image:url('/images/CircleCenterIcon.png');
+}
+
+.shape-choice
+{
+	width:64px;
+	height:64px;
+}
+canvas
+{
+	background-color:white;
+	border: 1px solid black;
+}
+
+
