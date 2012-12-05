@@ -46,10 +46,15 @@ div#circleCenter {
 	background-image:url('/images/CircleCenterIcon.png');
 }
 
-.shape-choice
+div#select {
+	background-image:url('/images/SelectIcon.jpg');
+}
+
+.toolbar-button
 {
-	width:64px;
-	height:64px;
+	width:48px;
+	height:48px;
+	border: 1px solid black;
 }
 canvas
 {

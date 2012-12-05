@@ -12,9 +12,10 @@
 <tr>
 	<td>
 		<div id ="lpanel">
-			<div id="line" class ="shape-choice"></div><br>
-			<div id="rectangle" class ="shape-choice"></div><br>
-			<div id="circleCenter" class ="shape-choice"></div><br>
+			<div id="line" class ="toolbar-button"></div><br>
+			<div id="rectangle" class ="toolbar-button"></div><br>
+			<div id="circleCenter" class ="toolbar-button"></div><br>
+			<div id="select" class ="toolbar-button"></div><br>
 		</div>
 	<td>
 		<div id="view"></div>

@@ -2,40 +2,40 @@
 $(document).ready(function() { // start doc ready; do not delete this!
 
 	//Create a canvas element
-	var canv = document.createElement('canvas');
+	var canvas = document.createElement('canvas');
 	
 	//Check if browser supports html5
-	if (!canv.getContext) 
+	if (!canvas.getContext) 
 	{
 	   alert("Your browser does not support html 5. Please use Chrome, IE ver. 9 or later.");
 	   return;
 	}
 
 	//Set canvas size (Setting canvas size in CSS does not work)
-	canv.width = 600;
-	canv.height = 400;
+	canvas.width = 600;
+	canvas.height = 400;
 	
 	//Add canvas to the div with id "view"
-	$("#view").get(0).appendChild(canv);
+	$("#view").get(0).appendChild(canvas);
 
 	//Create a CanvasState object.
-	var cState = new CanvasState($('canvas').get(0));
+	var cState = new CanvasState();
+	
+	var ctx = canvas.getContext("2d");
 
 	//Create one of each command.
-	var lineC = new LineCommand();
-	var circleC = new CircleCommand();
-	var rectangleC = new RectangleCommand();
-	
 	//Keep all the command in an array.
 	var allCommands = [];
-	allCommands.push(lineC);
-	allCommands.push(rectangleC);
-	allCommands.push(circleC);
+	allCommands.push(new LineCommand());
+	allCommands.push(new RectangleCommand());
+	allCommands.push(new CircleCommand());
+	allCommands.push(new SelectCommand());
 	
 	//Keep corresponding indices in the command selection elements.
 	$("#line").data('cmdIdx', 0);
 	$("#rectangle").data('cmdIdx', 1);
 	$("#circleCenter").data('cmdIdx', 2);
+	$("#select").data('cmdIdx', 3);
 
 	//Set the line-command as the active command
 	var activeCmdIdx= 0;
@@ -77,15 +77,20 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	$("#deleteLast").click(function() {
 
 		cState.shapes.pop();
-		cState.draw();
+		DrawShapes();
 	});
 
-	$(".shape-choice").click(function() {
-		$(".shape-choice").css('border', 'solid 1px black');		
+	$(".toolbar-button").click(function() {
+		$(".toolbar-button").css('border', 'solid 1px black');		
 		$(this).css('border', 'solid 2px red');
 		
+		activeCommand = allCommands[activeCmdIdx];
+		if (typeof activeCommand.end == 'function')
+			activeCommand.end();
 		activeCmdIdx = $(this).data('cmdIdx');
-		console.log(activeCmdIdx);
+		activeCommand = allCommands[activeCmdIdx];
+		if (typeof activeCommand.start == 'function')
+			activeCommand.start();
 	});
 	
 	function Point(x, y)
@@ -104,7 +109,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	}
 
 	//Draws a point.
-	Point.prototype.draw = function(ctx)
+	Point.prototype.draw = function()
 	{
 		//Draw a filled circle
 		ctx.beginPath();
@@ -130,23 +135,6 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	CanvasState.prototype.clear = function()
 	{
 		this.shapes = [];
-		this.draw();
-	}
-
-	//Draws canvas
-	CanvasState.prototype.draw = function()
-	{
-		var ctx = this.canvas.getContext("2d");
-		
-		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-		//Draw shapes
-		var nShapes = this.shapes.length;
-		for(var i=0; i<nShapes; i++)
-		{
-			var shape = this.shapes[i];
-			shape.draw(ctx);
-		}
 	}
 
 	//Define Line 
@@ -157,13 +145,10 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	}
 
 	// Implement draw
-	Line.prototype.draw = function(ctx)
+	Line.prototype.draw = function()
 	{
-		console.log("Line draw");
 		if (this.startPt != null && this.endPt != null)
 		{
-			ctx.lineWidth = 1;
-			ctx.strokeStyle = 'black';
 			ctx.beginPath();
 			ctx.moveTo(this.startPt.X, this.startPt.Y);
 			ctx.lineTo(this.endPt.X, this.endPt.Y);
@@ -179,16 +164,13 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	}
 
 	// Implement draw
-	Circle.prototype.draw = function(ctx)
+	Circle.prototype.draw = function()
 	{
-		console.log("Circle draw");
 		if (this.startPt != null && this.endPt != null)
 		{
 			var dX = this.startPt.X - this.endPt.X;
 			var dY = this.startPt.Y - this.endPt.Y;
 			var rad = Math.sqrt(dX * dX + dY * dY);
-			ctx.lineWidth = 1;
-			ctx.strokeStyle = 'black';
 			ctx.beginPath();
 			ctx.arc(this.startPt.X, this.startPt.Y, rad, 0, 2 * Math.PI, true);
 			ctx.closePath(); // Close the path
@@ -204,13 +186,10 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	}
 	
 	// Implement draw
-	Rectangle.prototype.draw = function(ctx)
+	Rectangle.prototype.draw = function()
 	{
-		console.log("Rectangle draw");
 		if (this.startPt != null && this.endPt != null)
 		{
-			ctx.lineWidth = 1;
-			ctx.strokeStyle = 'black';
 			ctx.beginPath();
 			ctx.moveTo(this.startPt.X, this.startPt.Y);
 			ctx.lineTo(this.endPt.X, this.startPt.Y);
@@ -239,10 +218,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Handle mousemove
 	LineCommand.prototype.mousemove = function(x, y)
 	{
-		if (this.line.startPt != null)
-		{
-			this.line.endPt = new Point(x, y);
-		}
+		OnShapeCommandMouseMove(this.line, x, y);
 	}
 	//Handle mouseup
 	LineCommand.prototype.mouseup = function(x, y)
@@ -252,7 +228,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			this.line.endPt = new Point(x, y);
 			cState.shapes.push(this.line);
 			this.line = new Line();
-			cState.draw();
+			DrawShapes();
 		}
 	}
 	
@@ -275,10 +251,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Handle mousemove
 	CircleCommand.prototype.mousemove = function(x, y)
 	{
-		if (this.circle.startPt != null)
-		{
-			this.circle.endPt = new Point(x, y);
-		}
+		OnShapeCommandMouseMove(this.circle, x, y);
 	}
 	//Handle mouseup
 	CircleCommand.prototype.mouseup = function(x, y)
@@ -288,7 +261,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			this.circle.endPt = new Point(x, y);
 			cState.shapes.push(this.circle);
 			this.circle = new Circle();
-			cState.draw();
+			DrawShapes();
 		}
 	}
 	
@@ -311,10 +284,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Handle mousemove
 	RectangleCommand.prototype.mousemove = function(x, y)
 	{
-		if (this.rectangle.startPt != null)
-		{
-			this.rectangle.endPt = new Point(x, y);
-		}
+		OnShapeCommandMouseMove(this.rectangle, x, y);
 	}
 	//Handle mouseup
 	RectangleCommand.prototype.mouseup = function(x, y)
@@ -324,9 +294,114 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			this.rectangle.endPt = new Point(x, y);
 			cState.shapes.push(this.rectangle);
 			this.rectangle = new Rectangle();
-			cState.draw();
+			DrawShapes();
+		}
+	}
+
+	function OnShapeCommandMouseMove(shape, x, y)
+	{
+		if (shape != null && shape.startPt != null)
+		{
+			shape.endPt = new Point(x, y);
+			DrawShapes();
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = 'blue';
+			shape.draw();
 		}
 	}
 	
+	
+	//Define SelectCommand
+	function SelectCommand()
+	{
+		this.selPoint = null;
+		this.dragStartX = 0;
+		this.dragStartY = 0;
+	}
+	
+	//Handle start
+	SelectCommand.prototype.start = function()
+	{
+		DrawShapeHandles();
+	}
+	
+	//Handle end
+	SelectCommand.prototype.end = function()
+	{
+		DrawShapes();
+	}
+
+	//Handle mousedown
+	SelectCommand.prototype.mousedown = function(x, y)
+	{
+		this.selPoint = null;
+		var nShapes = cState.shapes.length;
+		for(var i=0; i<nShapes; i++)
+		{
+			var shape = cState.shapes[i];
+			if(shape.startPt.isSamePoint(x, y))
+			{
+				this.selPoint = shape.startPt;
+				break;
+			}
+			else if(shape.endPt.isSamePoint(x, y))
+			{
+				this.selPoint = shape.endPt;
+				break;
+			}
+		}
+		
+		this.dragStartX = x;
+		this.dragStartY = y;
+	}
+	
+	//Handle mousemove
+	SelectCommand.prototype.mousemove = function(x, y)
+	{
+		if (this.selPoint != null)
+		{
+			var deltaX = x - this.dragStartX;
+			var deltaY = y - this.dragStartY;
+			
+			this.dragStartX = x;
+			this.dragStartY = y;
+				
+			this.selPoint.X += deltaX;
+			this.selPoint.Y += deltaY;
+			DrawShapes();
+			DrawShapeHandles();
+		}
+	}
+	//Handle mouseup
+	SelectCommand.prototype.mouseup = function(x, y)
+	{
+		this.selPoint = null;
+	}
+	
+	function DrawShapes()
+	{
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		//Draw shapes
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = 'black';
+		var nShapes = cState.shapes.length;
+		for(var i=0; i<nShapes; i++)
+		{
+			var shape = cState.shapes[i];
+			shape.draw();
+		}
+	}
+	
+	function DrawShapeHandles()
+	{
+		var nShapes = cState.shapes.length;
+		for(var i=0; i<nShapes; i++)
+		{
+			var shape = cState.shapes[i];
+			shape.startPt.draw();
+			shape.endPt.draw();
+		}
+	}
 }); // end doc ready; do not delete this!
 
