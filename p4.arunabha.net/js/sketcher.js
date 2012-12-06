@@ -49,6 +49,10 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		activeCommand.mousedown(x, y);
 	});
 
+	//define radius and redius-square of a point
+	var pt_rad = 5;
+	var pt_radSq = 25;
+	
 	//Handle mousemove event
 	$("canvas").mousemove(function(e) {
 		//Find out local coordinates
@@ -76,8 +80,9 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Remove last control point
 	$("#deleteLast").click(function() {
 
-		cState.shapes.pop();
-		DrawShapes();
+		WriteShapes();
+		//cState.shapes.pop();
+		//DrawShapes();
 	});
 
 	$(".toolbar-button").click(function() {
@@ -97,7 +102,6 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	{
 		this.X = x;
 		this.Y = y;
-		this.rad = 5;
 	}
 
 	//Returns true if (x, y) is within radius of 5 pixels
@@ -105,7 +109,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	{
 		var dx = this.X - x;
 		var dy = this.Y - y;
-		return (dx * dx + dy * dy) <= 25;
+		return (dx * dx + dy * dy) <= pt_radSq;
 	}
 
 	//Draws a point.
@@ -113,7 +117,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	{
 		//Draw a filled circle
 		ctx.beginPath();
-		ctx.arc(this.X, this.Y, this.rad, 0, 2 * Math.PI, true);
+		ctx.arc(this.X, this.Y, pt_rad, 0, 2 * Math.PI, true);
 		ctx.closePath(); // Close the path
 		ctx.fillStyle = 'red';
 		ctx.fill();
@@ -403,5 +407,60 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			shape.endPt.draw();
 		}
 	}
+	
+	//
+	function WriteShapes()
+	{
+		var shapesData = {
+			shapes: []
+		};
+
+		for(var i in cState.shapes) 
+		{
+			var item = cState.shapes[i];
+			//shapesData.shapes.push(item);
+			
+			shapesData.shapes.push({ 
+					"type"    : item.constructor.name, 
+					"startPt" : item.startPt,
+					"endPt"   : item.endPt,
+				});
+		}
+
+		cState.clear();
+		
+		var jString = JSON.stringify(shapesData);
+		console.log(jString);
+		ReadShapes(jString);
+		
+	}
+	
+	function ReadShapes(jShapes)
+	{
+		var shapesData = JSON.parse(jShapes);
+
+		for(var i in shapesData.shapes) 
+		{
+			var item = shapesData.shapes[i];
+			console.log(item.type);
+			console.log(item.startPt);
+			console.log(item.endPt);
+			
+			var obj = null;
+			if (item.type == "Line")
+				obj = new Line();
+			else if (item.type == "Circle")
+				obj = new Circle();
+			else if (item.type == "Rectangle")
+				obj = new Rectangle();
+				
+			obj.startPt = new Point(item.startPt.X, item.startPt.Y);
+			obj.endPt = new Point(item.endPt.X, item.endPt.Y);
+			cState.shapes.push(obj);
+		}
+		
+		DrawShapes();
+	}
+
 }); // end doc ready; do not delete this!
 

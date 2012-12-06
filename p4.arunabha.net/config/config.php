@@ -32,7 +32,7 @@ A email designated to receive messages from the server. Examples:
 	define('SYSTEM_EMAIL', ''); 
 
 # Default DB name for this app
-	define('DB_NAME', "arunabha_p3_arunabha_net"); 
+	define('DB_NAME', "arunabha_p4_arunabha_net"); 
 
 # Timezone
 	define('TIMEZONE', 'America/New_York');
