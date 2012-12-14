@@ -18,6 +18,9 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Add canvas to the div with id "view"
 	$("#view").get(0).appendChild(canvas);
 
+	//Load drawing names
+	loadDrawingNames();
+	
 	//Create a CanvasState object.
 	var cState = new CanvasState();
 	
@@ -39,6 +42,8 @@ $(document).ready(function() { // start doc ready; do not delete this!
 
 	//Set the line-command as the active command
 	var activeCmdIdx= 0;
+	
+	var activeDrawingId = 0;
 	
 	//Handle mousedown event
 	$("canvas").mousedown(function(e) {
@@ -80,11 +85,32 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Remove last control point
 	$("#deleteLast").click(function() {
 
-		WriteShapes();
+		//WriteShapes();
 		//cState.shapes.pop();
 		//DrawShapes();
 	});
 
+	//Save the drawing
+	$("#save").click(function() {
+
+		WriteShapes();
+	});
+	
+	$(".dLink").live('click', function() {
+
+		var id = $(this).attr('id');
+		var options = { 
+			type: 'GET',
+			url: '/drawings/read/' + id,
+			success: function(response) { 	
+				console.log(response);				
+				ReadShapes(response);
+			} 
+		}
+		$.ajax(options);
+		
+	});
+	
 	$(".toolbar-button").click(function() {
 		$(".toolbar-button").css('border', 'solid 1px black');		
 		$(this).css('border', 'solid 2px red');
@@ -427,18 +453,36 @@ $(document).ready(function() { // start doc ready; do not delete this!
 				});
 		}
 
-		cState.clear();
+		//cState.clear();
 		
 		var jString = JSON.stringify(shapesData);
 		console.log(jString);
-		ReadShapes(jString);
-		
+		//ReadShapes(jString);
+		var postData = {drawing_id : activeDrawingId, content : jString};
+		var options = { 
+			type: 'POST',
+			url: '/drawings/p_save/',
+			data : postData,
+			beforeSubmit: function() {
+				//$('#results').html("Adding...");
+			},
+			success: function(response) { 	
+				console.log(response);
+			} 
+		}
+		$.ajax(options);
 	}
 	
 	function ReadShapes(jShapes)
 	{
-		var shapesData = JSON.parse(jShapes);
-
+		cState.clear();
+		var json = JSON.parse(jShapes);
+		
+		if (json.length == 0)
+			return;
+		
+		var shapesData = JSON.parse(json[0]["content"]);
+		
 		for(var i in shapesData.shapes) 
 		{
 			var item = shapesData.shapes[i];
@@ -462,5 +506,33 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		DrawShapes();
 	}
 
+	function loadDrawingNames()
+	{
+		var options = { 
+			type: 'GET',
+			url: '/drawings/ids/',
+			success: function(response) { 	
+				console.log(response);
+				
+				$('#rpanel').empty();
+				
+				var drawingIds = JSON.parse(response);
+				
+				if (drawingIds.length > 0)
+				{
+					var links = "";
+					for(var i in drawingIds) 
+					{
+						var id = drawingIds[i];
+						links += '<button class="dLink" id=' + id + '> Drawing - ' + id + '</button>';
+					}
+					$('#rpanel').append(links);
+					
+					
+				}
+			} 
+		}
+		$.ajax(options);
+	}
 }); // end doc ready; do not delete this!
 

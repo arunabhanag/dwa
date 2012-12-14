@@ -30,6 +30,7 @@
 		<div id="buttons">
 		<input id="clearCanvas" type='submit' value="Clear Canvas"/>
 		<input id="deleteLast" type='submit' value="Delete Last Point"/>
+		<input id="save" type='submit' value="Save"/>
 		</div>
 	</td>
 	<td></td>
