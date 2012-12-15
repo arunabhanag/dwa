@@ -3,7 +3,7 @@
 	<td>
 	</td>
 	<td>
-		<div>
+		<div id ="tpanel">
 		File name goes here
 		</div>
 	</td>

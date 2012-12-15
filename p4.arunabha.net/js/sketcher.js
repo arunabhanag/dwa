@@ -18,8 +18,8 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Add canvas to the div with id "view"
 	$("#view").get(0).appendChild(canvas);
 
-	//Load drawing names
-	loadDrawingNames();
+	//update drawing names
+	updateDrawingNames();
 	
 	//Create a CanvasState object.
 	var cState = new CanvasState();
@@ -44,6 +44,8 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	var activeCmdIdx= 0;
 	
 	var activeDrawingId = 0;
+	
+	updateTopPanel();
 	
 	//Handle mousedown event
 	$("canvas").mousedown(function(e) {
@@ -105,6 +107,8 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			success: function(response) { 	
 				console.log(response);				
 				ReadShapes(response);
+				activeDrawingId = id;
+				updateTopPanel();
 			} 
 		}
 		$.ajax(options);
@@ -468,6 +472,8 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			},
 			success: function(response) { 	
 				console.log(response);
+				activeDrawingId = response;
+				updateTopPanel();
 			} 
 		}
 		$.ajax(options);
@@ -506,7 +512,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		DrawShapes();
 	}
 
-	function loadDrawingNames()
+	function updateDrawingNames()
 	{
 		var options = { 
 			type: 'GET',
@@ -524,15 +530,20 @@ $(document).ready(function() { // start doc ready; do not delete this!
 					for(var i in drawingIds) 
 					{
 						var id = drawingIds[i];
-						links += '<button class="dLink" id=' + id + '> Drawing - ' + id + '</button>';
+						links += '<button class="dLink" id=' + id + '>Drawing - ' + id + '</button>';
 					}
 					$('#rpanel').append(links);
-					
-					
 				}
 			} 
 		}
 		$.ajax(options);
+	}
+	
+	function updateTopPanel()
+	{
+		var name = "Drawing - " + activeDrawingId;
+		$('#tpanel').empty();
+		$('#tpanel').append(name);
 	}
 }); // end doc ready; do not delete this!
 

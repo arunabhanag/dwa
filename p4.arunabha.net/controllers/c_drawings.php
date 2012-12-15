@@ -74,13 +74,13 @@ class drawings_controller extends base_controller {
 		if ($_POST['drawing_id'] == 0)
 			$_POST['drawing_id'] = $this->createNewDrawing();
 		
-		echo "drawing_id = ".$_POST['drawing_id'];
-		
 		if ($_POST['drawing_id'] != 0)
 		{
 			// # Do the update
 			DB::instance(DB_NAME)->update("drawings", $_POST, "WHERE drawing_id = '".$_POST['drawing_id']."'");
-		}	
+		}
+		
+		echo $_POST['drawing_id'];
 	}	
 	
 	
