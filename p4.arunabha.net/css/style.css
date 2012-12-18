@@ -1,6 +1,11 @@
 #wrapper {
-	width:600px;
+	width:808px;
 	margin:0px auto;
+}
+
+.logout 
+{
+	float: right;
 }
 
 body
@@ -10,26 +15,27 @@ body
 	font-family: arial, sans, sans-serif;
 }
 
-div
-{
-	margin-top:10px;
-}
-
 div#header {
 	text-align: center;
 	background-color:#6caafc;
 }
 
-div#lpanel {
-	width:64px;
-	float:left;
+td
+{
+vertical-align:top;
 }
 
 div#view {
 	float:left;
 }
 
-div#rpanel {
+.lcol {
+	margin-right:20px;
+	float:left;
+}
+
+.rcol {
+	margin-left: 20px;
 	width:120px;
 	float:left;
 }
