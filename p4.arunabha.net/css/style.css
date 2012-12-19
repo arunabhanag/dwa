@@ -1,5 +1,5 @@
 #wrapper {
-	width:808px;
+	width:854px;
 	margin:0px auto;
 }
 
@@ -48,8 +48,8 @@ div#signup{
 }
 
 .rcol {
-	margin-left:40px;
-	width:120px;
+	width:140px;
+	padding-left:20px;
 }
 
 div#line {
@@ -73,11 +73,16 @@ div#select {
 	width:48px;
 	height:48px;
 	border: 1px solid black;
+	cursor:pointer;
 }
 canvas
 {
 	background-color:white;
 	border: 1px solid black;
 }
-
-
+.dLink {
+	background-color:white;
+	padding:3px;
+	border: 1px solid gray;
+	cursor:pointer;
+}

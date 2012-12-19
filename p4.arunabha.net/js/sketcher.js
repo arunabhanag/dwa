@@ -5,7 +5,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	var canvas = document.createElement('canvas');
 	
 	//Check if browser supports html5
-	if (!canvas || !canvas.getContext("2d")) 
+	if (!canvas.getContext) 
 	{
 	   alert("Your browser does not support html 5. Please use Chrome, IE ver. 9 or later.");
 	   return;
@@ -24,10 +24,11 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Create a CanvasState object.
 	var cState = new CanvasState();
 	
+	//Get canvas 2d context
 	var ctx = canvas.getContext("2d");
 
-	//Create one of each command.
-	//Keep all the command in an array.
+	//Create one instance of each command in an array.
+	
 	var allCommands = [];
 	allCommands.push(new LineCommand());
 	allCommands.push(new RectangleCommand());
@@ -41,15 +42,16 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	$("#select").data('cmdIdx', 3);
 
 	//Set the line-command as the active command
-	var activeCmdIdx= 0;
-	
-	var activeDrawingId = 0;
-	
+	var activeCmdIdx = $("#line").data('cmdIdx');	
+	var activeDrawingId = 0;	
 	var undoStack = [];
-	$('#undo').attr('disabled', 'disabled');
-	$('#save').attr('disabled', 'disabled');
 	
 	updateTopPanel();
+	activateCommand($(".toolbar-button#line"));
+	
+	//Keep undo and save button disabled
+	$('#undo').attr('disabled', 'disabled');
+	$('#save').attr('disabled', 'disabled');
 	
 	//Handle mousedown event
 	$("canvas").mousedown(function(e) {
@@ -90,6 +92,9 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		{
 			popped.apply();
 			drawShapes();
+			//Select is the active command
+			if (activeCmdIdx == 3)
+				drawShapeHandles();
 		}
 		if (undoStack.length == 0)
 		{
@@ -98,7 +103,17 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		}
 	});
 
-	//Remove last control point
+	//Create a new drawing
+	$("#new").click(function() {
+		//clear canvas-state
+		cState.clear();
+		//clear canvas 
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		activeDrawingId = 0;
+		updateTopPanel();
+	});
+	
+	//Print the canvas
 	$("#print").click(function() {
 
 		// Setup the window we're about to open   
@@ -122,7 +137,6 @@ $(document).ready(function() { // start doc ready; do not delete this!
 
 	//Save the drawing
 	$("#save").click(function() {
-
 		saveShapes();
 	});
 	
@@ -143,16 +157,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	});
 	
 	$(".toolbar-button").click(function() {
-		$(".toolbar-button").css('border', 'solid 1px black');		
-		$(this).css('border', 'solid 2px red');
-		
-		activeCommand = allCommands[activeCmdIdx];
-		if (typeof activeCommand.end == 'function')
-			activeCommand.end();
-		activeCmdIdx = $(this).data('cmdIdx');
-		activeCommand = allCommands[activeCmdIdx];
-		if (typeof activeCommand.start == 'function')
-			activeCommand.start();
+		activateCommand(this);
 	});
 	
 	function Point(x, y)
@@ -495,6 +500,20 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		this.oldShape = null;
 	}
 	
+	function activateCommand(cmdDiv)
+	{
+		$(".toolbar-button").css('border', 'solid 1px black');		
+		$(cmdDiv).css('border', 'solid 2px red');
+		
+		activeCommand = allCommands[activeCmdIdx];
+		if (typeof activeCommand.end == 'function')
+			activeCommand.end();
+		activeCmdIdx = $(cmdDiv).data('cmdIdx');
+		activeCommand = allCommands[activeCmdIdx];
+		if (typeof activeCommand.start == 'function')
+			activeCommand.start();
+	}
+	
 	function drawShapes()
 	{
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -540,10 +559,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 				});
 		}
 
-		//cState.clear();
-		
 		var jString = JSON.stringify(shapesData);
-		//readShapes(jString);
 		var postData = {drawing_id : activeDrawingId, content : jString};
 		var options = { 
 			type: 'POST',
@@ -607,7 +623,8 @@ $(document).ready(function() { // start doc ready; do not delete this!
 					for(var i in drawingIds) 
 					{
 						var id = drawingIds[i];
-						links += '<button class="dLink" id=' + id + '>Drawing - ' + id + '</button>';
+						links += '<div class="dLink" id=' + id + '>Drawing - ' + id + '</div>';
+						// links += '<button class="dLink" id=' + id + '>Drawing - ' + id + '</button>';
 					}
 					$('#rpanel').append(links);
 				}
@@ -618,7 +635,12 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	
 	function updateTopPanel()
 	{
-		var name = "Drawing - " + activeDrawingId;
+		var name = null;
+		if (activeDrawingId != 0)
+			name = "Drawing - " + activeDrawingId;
+		else
+			name = "New Drawing";
+			
 		$('#tpanel').empty();
 		$('#tpanel').append(name);
 	}

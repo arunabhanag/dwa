@@ -17,6 +17,9 @@
 <br>
 
 <div id="login">
+
+	<img src="/images/Login" width="80" height="80">
+
 	<form method='POST' action='/users/p_login'>
 
 		Email<br>
@@ -53,5 +56,3 @@
 		<input type='submit'  value="Sign up">
 	</form> 
 </div>
-
-

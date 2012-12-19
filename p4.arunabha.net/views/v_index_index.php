@@ -30,17 +30,14 @@
 	<td  class="lcol"></td>
 	<td>
 		<div id="buttons">
+		<button id="new">New</button>
 		<button id="undo">Undo</button>
 		<button id="save">Save</button>
 		<button id="print">Print Canvas</button>
 		</div>
 	</td>
-	<td></td>
+	<td class="rcol"></td>
 </tr>
 </table>
 
-<div id="help">
-	<p>
-		Help goes here
-	</p>
-</div>		
+
