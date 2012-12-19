@@ -566,11 +566,12 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			url: '/drawings/p_save/',
 			data : postData,
 			beforeSubmit: function() {
-				//$('#results').html("Adding...");
+				
 			},
 			success: function(response) { 	
 				activeDrawingId = response;
 				updateTopPanel();
+				updateDrawingNames();
 			} 
 		}
 		$.ajax(options);

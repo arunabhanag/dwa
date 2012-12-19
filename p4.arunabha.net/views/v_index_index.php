@@ -33,7 +33,7 @@
 		<button id="new">New</button>
 		<button id="undo">Undo</button>
 		<button id="save">Save</button>
-		<button id="print">Print Canvas</button>
+		<button id="print">Print Drawing</button>
 		</div>
 	</td>
 	<td class="rcol"></td>

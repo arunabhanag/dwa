@@ -43,9 +43,12 @@ class users_controller extends base_controller {
 		{
 			Router::redirect("/users/index/e_email_used");
 		}
-			
+		
+		#Keep the unencrypted password in a local variable.
+		$passwd = $_POST['password'];
+		
 		# Encrypt the password	
-		$_POST['password'] = sha1(PASSWORD_SALT.$_POST['password']);	
+		$_POST['password'] = sha1(PASSWORD_SALT.$passwd);	
 	
 		# More data we want to store with the user	
 		$_POST['created']  = Time::now();
@@ -55,6 +58,8 @@ class users_controller extends base_controller {
 		# Insert this user into the database
 		$user_id = DB::instance(DB_NAME)->insert("users", $_POST);
 		
+		#Putback the unencrypted password before calling p_login()
+		$_POST['password'] = $passwd;
 		$this->p_login();
 	}
 
