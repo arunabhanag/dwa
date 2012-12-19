@@ -11,7 +11,9 @@
 	<!-- JS -->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
-	
+</head>
+
+<body>	
 	<!-- Controller Specific JS/CSS -->
 	<?php echo @$client_files; ?>
 
@@ -34,10 +36,7 @@
 			<?endif;?>
 		</div>
 	</div>
-</head>
 
-<body>	
-	
 </body>
 </html>
 

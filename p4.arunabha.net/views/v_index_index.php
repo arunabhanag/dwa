@@ -30,9 +30,9 @@
 	<td  class="lcol"></td>
 	<td>
 		<div id="buttons">
-		<input id="clearCanvas" type='submit' value="Clear Canvas"/>
-		<input id="deleteLast" type='submit' value="Delete Last Point"/>
-		<input id="save" type='submit' value="Save"/>
+		<button id="undo">Undo</button>
+		<button id="save">Save</button>
+		<button id="print">Print Canvas</button>
 		</div>
 	</td>
 	<td></td>

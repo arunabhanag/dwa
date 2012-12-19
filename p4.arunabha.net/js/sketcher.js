@@ -5,7 +5,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	var canvas = document.createElement('canvas');
 	
 	//Check if browser supports html5
-	if (!canvas.getContext) 
+	if (!canvas || !canvas.getContext("2d")) 
 	{
 	   alert("Your browser does not support html 5. Please use Chrome, IE ver. 9 or later.");
 	   return;
@@ -45,6 +45,10 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	
 	var activeDrawingId = 0;
 	
+	var undoStack = [];
+	$('#undo').attr('disabled', 'disabled');
+	$('#save').attr('disabled', 'disabled');
+	
 	updateTopPanel();
 	
 	//Handle mousedown event
@@ -79,23 +83,47 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		activeCommand.mouseup(x, y);
 	});
 
-	//Clear canvas
-	$("#clearCanvas").click(function() {
-	  cState.clear();
+	//Undo last modification
+	$("#undo").click(function() {
+		var popped = undoStack.pop();
+		if (popped)
+		{
+			popped.apply();
+			drawShapes();
+		}
+		if (undoStack.length == 0)
+		{
+			$('#undo').attr('disabled', 'disabled');
+			$('#save').attr('disabled', 'disabled');
+		}
 	});
 
 	//Remove last control point
-	$("#deleteLast").click(function() {
+	$("#print").click(function() {
 
-		//WriteShapes();
-		//cState.shapes.pop();
-		//DrawShapes();
+		// Setup the window we're about to open   
+		var print_window =  window.open('','_blank','width=600, height=400');
+		
+		// Create an image
+		var img = canvas.toDataURL("image/png");
+				
+		// Build the HTML content for that window
+			var html = '<html>';
+				html += '<head>';
+				html += '</head>';
+				html += '<body>';
+				html += '<img src="'+img+'"/>';
+				html += '</body>';
+				html += '</html>';
+	   
+		// Write to our new window
+		print_window.document.write(html);
 	});
 
 	//Save the drawing
 	$("#save").click(function() {
 
-		WriteShapes();
+		saveShapes();
 	});
 	
 	$(".dLink").live('click', function() {
@@ -105,8 +133,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			type: 'GET',
 			url: '/drawings/read/' + id,
 			success: function(response) { 	
-				console.log(response);				
-				ReadShapes(response);
+				readShapes(response);
 				activeDrawingId = id;
 				updateTopPanel();
 			} 
@@ -163,14 +190,30 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	{
 		this.canvas = cnv;
 		this.shapes = [];
+		
+		$('#undo').attr('disabled', 'disabled');
+		$('#save').attr('disabled', 'disabled');
 	}
 
 	//Removes all the control points
 	CanvasState.prototype.clear = function()
 	{
 		this.shapes = [];
+		undoStack = [];
+		
+		$('#undo').attr('disabled', 'disabled');
+		$('#save').attr('disabled', 'disabled');
 	}
 
+	CanvasState.prototype.addNewObject = function(object)
+	{
+		cState.shapes.push(object);
+		undoStack.push(new UndoObject(null, object));
+		
+		$('#undo').removeAttr('disabled');
+		$('#save').removeAttr('disabled');
+	}
+	
 	//Define Line 
 	function Line()
 	{
@@ -188,6 +231,14 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			ctx.lineTo(this.endPt.X, this.endPt.Y);
 			ctx.stroke();
 		}
+	}
+	
+	Line.prototype.copy = function()
+	{
+		var newObj = new Line();
+		newObj.startPt = new Point(this.startPt.X, this.startPt.Y);
+		newObj.endPt = new Point(this.endPt.X, this.endPt.Y);
+		return newObj;
 	}
 	
 	//Define Circle 
@@ -212,11 +263,27 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		}
 	}
 	
+	Circle.prototype.copy = function()
+	{
+		var newObj = new Circle();
+		newObj.startPt = new Point(this.startPt.X, this.startPt.Y);
+		newObj.endPt = new Point(this.endPt.X, this.endPt.Y);
+		return newObj;
+	}
+	
 	//Define Rectangle 
 	function Rectangle()
 	{
 		this.startPt = null;
 		this.endPt = null;
+	}
+	
+	Rectangle.prototype.copy = function()
+	{
+		var newObj = new Rectangle();
+		newObj.startPt = new Point(this.startPt.X, this.startPt.Y);
+		newObj.endPt = new Point(this.endPt.X, this.endPt.Y);
+		return newObj;
 	}
 	
 	// Implement draw
@@ -252,7 +319,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Handle mousemove
 	LineCommand.prototype.mousemove = function(x, y)
 	{
-		OnShapeCommandMouseMove(this.line, x, y);
+		onShapeCommandMouseMove(this.line, x, y);
 	}
 	//Handle mouseup
 	LineCommand.prototype.mouseup = function(x, y)
@@ -260,9 +327,9 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		if (this.line.endPt != null)
 		{
 			this.line.endPt = new Point(x, y);
-			cState.shapes.push(this.line);
+			cState.addNewObject(this.line);
 			this.line = new Line();
-			DrawShapes();
+			drawShapes();
 		}
 	}
 	
@@ -285,7 +352,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Handle mousemove
 	CircleCommand.prototype.mousemove = function(x, y)
 	{
-		OnShapeCommandMouseMove(this.circle, x, y);
+		onShapeCommandMouseMove(this.circle, x, y);
 	}
 	//Handle mouseup
 	CircleCommand.prototype.mouseup = function(x, y)
@@ -293,9 +360,9 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		if (this.circle.endPt != null)
 		{
 			this.circle.endPt = new Point(x, y);
-			cState.shapes.push(this.circle);
+			cState.addNewObject(this.circle);
 			this.circle = new Circle();
-			DrawShapes();
+			drawShapes();
 		}
 	}
 	
@@ -318,7 +385,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Handle mousemove
 	RectangleCommand.prototype.mousemove = function(x, y)
 	{
-		OnShapeCommandMouseMove(this.rectangle, x, y);
+		onShapeCommandMouseMove(this.rectangle, x, y);
 	}
 	//Handle mouseup
 	RectangleCommand.prototype.mouseup = function(x, y)
@@ -326,18 +393,18 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		if (this.rectangle.endPt != null)
 		{
 			this.rectangle.endPt = new Point(x, y);
-			cState.shapes.push(this.rectangle);
+			cState.addNewObject(this.rectangle);
 			this.rectangle = new Rectangle();
-			DrawShapes();
+			drawShapes();
 		}
 	}
 
-	function OnShapeCommandMouseMove(shape, x, y)
+	function onShapeCommandMouseMove(shape, x, y)
 	{
 		if (shape != null && shape.startPt != null)
 		{
 			shape.endPt = new Point(x, y);
-			DrawShapes();
+			drawShapes();
 			ctx.lineWidth = 1;
 			ctx.strokeStyle = 'blue';
 			shape.draw();
@@ -351,18 +418,21 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		this.selPoint = null;
 		this.dragStartX = 0;
 		this.dragStartY = 0;
+		this.shapeIndex = 0;
+		this.oldShape = null;
 	}
 	
-	//Handle start
+	//Handle command start
 	SelectCommand.prototype.start = function()
 	{
-		DrawShapeHandles();
+		drawShapeHandles();
 	}
 	
-	//Handle end
+	//Handle command end
 	SelectCommand.prototype.end = function()
 	{
-		DrawShapes();
+		drawShapes();
+		this.selPoint = null;
 	}
 
 	//Handle mousedown
@@ -375,11 +445,13 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			var shape = cState.shapes[i];
 			if(shape.startPt.isSamePoint(x, y))
 			{
+				this.shapeIndex = i;
 				this.selPoint = shape.startPt;
 				break;
 			}
 			else if(shape.endPt.isSamePoint(x, y))
 			{
+				this.shapeIndex = i;
 				this.selPoint = shape.endPt;
 				break;
 			}
@@ -394,6 +466,9 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	{
 		if (this.selPoint != null)
 		{
+			if (this.oldShape == null)
+				this.oldShape = cState.shapes[this.shapeIndex].copy();
+				
 			var deltaX = x - this.dragStartX;
 			var deltaY = y - this.dragStartY;
 			
@@ -402,17 +477,25 @@ $(document).ready(function() { // start doc ready; do not delete this!
 				
 			this.selPoint.X += deltaX;
 			this.selPoint.Y += deltaY;
-			DrawShapes();
-			DrawShapeHandles();
+			drawShapes();
+			drawShapeHandles();
 		}
 	}
 	//Handle mouseup
 	SelectCommand.prototype.mouseup = function(x, y)
 	{
+		if (this.oldShape)
+		{
+			undoStack.push(new UndoObject(this.oldShape, cState.shapes[this.shapeIndex]));
+			
+			$('#undo').removeAttr('disabled');
+			$('#save').removeAttr('disabled');
+		}
 		this.selPoint = null;
+		this.oldShape = null;
 	}
 	
-	function DrawShapes()
+	function drawShapes()
 	{
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -427,7 +510,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		}
 	}
 	
-	function DrawShapeHandles()
+	function drawShapeHandles()
 	{
 		var nShapes = cState.shapes.length;
 		for(var i=0; i<nShapes; i++)
@@ -439,7 +522,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	}
 	
 	//
-	function WriteShapes()
+	function saveShapes()
 	{
 		var shapesData = {
 			shapes: []
@@ -460,8 +543,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		//cState.clear();
 		
 		var jString = JSON.stringify(shapesData);
-		console.log(jString);
-		//ReadShapes(jString);
+		//readShapes(jString);
 		var postData = {drawing_id : activeDrawingId, content : jString};
 		var options = { 
 			type: 'POST',
@@ -471,7 +553,6 @@ $(document).ready(function() { // start doc ready; do not delete this!
 				//$('#results').html("Adding...");
 			},
 			success: function(response) { 	
-				console.log(response);
 				activeDrawingId = response;
 				updateTopPanel();
 			} 
@@ -479,7 +560,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		$.ajax(options);
 	}
 	
-	function ReadShapes(jShapes)
+	function readShapes(jShapes)
 	{
 		cState.clear();
 		var json = JSON.parse(jShapes);
@@ -492,9 +573,6 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		for(var i in shapesData.shapes) 
 		{
 			var item = shapesData.shapes[i];
-			console.log(item.type);
-			console.log(item.startPt);
-			console.log(item.endPt);
 			
 			var obj = null;
 			if (item.type == "Line")
@@ -509,7 +587,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			cState.shapes.push(obj);
 		}
 		
-		DrawShapes();
+		drawShapes();
 	}
 
 	function updateDrawingNames()
@@ -518,7 +596,6 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			type: 'GET',
 			url: '/drawings/ids/',
 			success: function(response) { 	
-				console.log(response);
 				
 				$('#rpanel').empty();
 				
@@ -545,5 +622,27 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		$('#tpanel').empty();
 		$('#tpanel').append(name);
 	}
+	
+	//Define UndoObject 
+	function UndoObject(oObj, nObj)
+	{
+		this.oldObj = oObj;
+		this.newObj = nObj;
+	}
+
+	//Apply undo object
+	UndoObject.prototype.apply = function()
+	{
+		if (!this.oldObj && this.newObj)
+		{
+			cState.shapes.pop();
+		}
+		else if (this.oldObj && this.newObj)
+		{
+			this.newObj.startPt = this.oldObj.startPt;
+			this.newObj.endPt = this.oldObj.endPt;
+		}
+	}
+	
 }); // end doc ready; do not delete this!
 

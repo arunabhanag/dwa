@@ -9,11 +9,11 @@ class users_controller extends base_controller {
 	/*-------------------------------------------------------------------------------------------------
 	Access via http://yourapp.com/index/index/
 	-------------------------------------------------------------------------------------------------*/
-	public function index($user_id = 0) 
+	public function index($error = 0) 
 	{
 		# Setup view
 		$this->template->content = View::instance('v_users_index');
-		$this->template->content->error = null;
+		$this->template->content->error = $error;
 		echo $this->template;
 	}
 	
@@ -22,13 +22,13 @@ class users_controller extends base_controller {
 		# Check if any field is missing
 		if(!$_POST['first_name'] || !$_POST['last_name'] || !$_POST['password'] || !$_POST['email']) 
 		{
-			Router::redirect("/users/signup/fields_missing");
+			Router::redirect("/users/index/e_fields_missing");
 		}
 		
 		#Check for valid email id
 		if(false == PHPMailer::ValidateAddress($_POST['email']))
 		{
-			Router::redirect("/users/signup/email_invalid");
+			Router::redirect("/users/index/e_email_invalid");
 		}
 		
 		# Search the db for this email, Retrieve the token if it's available
@@ -41,7 +41,7 @@ class users_controller extends base_controller {
 		#If token exists, an user already signed-up with this email id. Redirect to signup page with an error
 		if($token) 
 		{
-			Router::redirect("/users/index/email_used");
+			Router::redirect("/users/index/e_email_used");
 		}
 			
 		# Encrypt the password	
@@ -74,7 +74,7 @@ class users_controller extends base_controller {
 		# If we didn't get an user, login failed. Send user back to the login page with an error
 		if(!$user) 
 		{
-			Router::redirect("/users/login/error");
+			Router::redirect("/users/index/e_login");
 			return;
 		}
 		else //Login successful

@@ -29,15 +29,27 @@ div#view {
 	float:left;
 }
 
+.error {
+	color:red;
+	height:60px;
+}
+
+div#login {
+	float:left;
+}
+
+div#signup{
+	float:right;
+}
+
 .lcol {
 	margin-right:20px;
 	float:left;
 }
 
 .rcol {
-	margin-left: 20px;
+	margin-left:40px;
 	width:120px;
-	float:left;
 }
 
 div#line {
