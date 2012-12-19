@@ -11,6 +11,11 @@ class users_controller extends base_controller {
 	-------------------------------------------------------------------------------------------------*/
 	public function index($error = 0) 
 	{
+		#User logged in. redirect to the home page
+		if($this->user) 
+		{
+			Router::redirect("/");
+		}
 		# Setup view
 		$this->template->content = View::instance('v_users_index');
 		$this->template->content->error = $error;

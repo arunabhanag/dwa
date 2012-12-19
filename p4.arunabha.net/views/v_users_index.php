@@ -18,8 +18,7 @@
 
 <div id="login">
 
-	<img src="/images/Login.png" width="80" height="80">
-
+	<img id="login_image" src="/images/Login.png" alt="User">
 	<form method='POST' action='/users/p_login'>
 
 		Email<br>

@@ -185,7 +185,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		ctx.fill();
 		
 		//Draw a line circle
-		ctx.lineWidth = 1;
+		ctx.lineWidth = 2;
 		ctx.strokeStyle = 'black';
 		ctx.stroke();
 	}
@@ -410,7 +410,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		{
 			shape.endPt = new Point(x, y);
 			drawShapes();
-			ctx.lineWidth = 1;
+			ctx.lineWidth = 2;
 			ctx.strokeStyle = 'blue';
 			shape.draw();
 		}
@@ -519,7 +519,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		//Draw shapes
-		ctx.lineWidth = 1;
+		ctx.lineWidth = 2;
 		ctx.strokeStyle = 'black';
 		var nShapes = cState.shapes.length;
 		for(var i=0; i<nShapes; i++)
