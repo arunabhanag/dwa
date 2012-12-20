@@ -140,6 +140,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		saveShapes();
 	});
 	
+	//Handle click event on drawing (right panel)
 	$(".dLink").live('click', function() {
 
 		var id = $(this).attr('id');
@@ -156,10 +157,12 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		
 	});
 	
+	//Left panel command selection
 	$(".toolbar-button").click(function() {
 		activateCommand(this);
 	});
 	
+	//Define point
 	function Point(x, y)
 	{
 		this.X = x;
@@ -210,6 +213,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		$('#save').attr('disabled', 'disabled');
 	}
 
+	//Add new shape object
 	CanvasState.prototype.addNewObject = function(object)
 	{
 		cState.shapes.push(object);
@@ -222,6 +226,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Define Line 
 	function Line()
 	{
+		this.type = "Line";
 		this.startPt = null;
 		this.endPt = null;
 	}
@@ -237,7 +242,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			ctx.stroke();
 		}
 	}
-	
+	//Deep copy
 	Line.prototype.copy = function()
 	{
 		var newObj = new Line();
@@ -249,6 +254,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Define Circle 
 	function Circle()
 	{
+		this.type = "Circle";
 		this.startPt = null;
 		this.endPt = null;
 	}
@@ -268,6 +274,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		}
 	}
 	
+	//Deep copy
 	Circle.prototype.copy = function()
 	{
 		var newObj = new Circle();
@@ -279,10 +286,12 @@ $(document).ready(function() { // start doc ready; do not delete this!
 	//Define Rectangle 
 	function Rectangle()
 	{
+		this.type = "Rectangle";
 		this.startPt = null;
 		this.endPt = null;
 	}
 	
+	//Deep copy
 	Rectangle.prototype.copy = function()
 	{
 		var newObj = new Rectangle();
@@ -500,6 +509,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		this.oldShape = null;
 	}
 	
+	//Activate a command
 	function activateCommand(cmdDiv)
 	{
 		$(".toolbar-button").css('border', 'solid 1px black');		
@@ -514,6 +524,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			activeCommand.start();
 	}
 	
+	//draw shapes
 	function drawShapes()
 	{
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -529,6 +540,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 		}
 	}
 	
+	//draw shape point handles
 	function drawShapeHandles()
 	{
 		var nShapes = cState.shapes.length;
@@ -553,7 +565,7 @@ $(document).ready(function() { // start doc ready; do not delete this!
 			//shapesData.shapes.push(item);
 			
 			shapesData.shapes.push({ 
-					"type"    : item.constructor.name, 
+					"type"    : item.type, 
 					"startPt" : item.startPt,
 					"endPt"   : item.endPt,
 				});
